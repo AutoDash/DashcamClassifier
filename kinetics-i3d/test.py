@@ -36,7 +36,7 @@ def tf_load_data(npy_path, label):
     def _load_data(npy_path, label):
         return np.load(npy_path), label
 
-    return tf.py_func(_load_data, [npy_path, label], [tf.float16, tf.float16])
+    return tf.py_func(_load_data, [npy_path, label], [tf.float32, tf.float32])
 
 
 def data_augmentations(x, y):
@@ -61,7 +61,7 @@ def to_npy(mp4):
     cap = cv2.VideoCapture(mp4)
     frameCount = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
-    buf = np.empty((VIDEO_FRAMES, _IMAGE_SIZE, _IMAGE_SIZE, 3), np.dtype('float16'))
+    buf = np.empty((VIDEO_FRAMES, _IMAGE_SIZE, _IMAGE_SIZE, 3), np.dtype('float32'))
 
     fc = 0
     ret = True
@@ -114,7 +114,7 @@ def convert_all_vids():
         print(f"read video {filename}")
         video = to_npy(filename)
         print("converted")
-        np.savez(file, video)
+        np.savez(train_path + file, video)
         print("saved")
 
 
@@ -132,7 +132,7 @@ def train():
     dataset = build_dataset(file_names, labels)
     iter = dataset.make_one_shot_iterator()
     X, Y = iter.get_next()
-
+    print(f"X: {X}, Y:{Y}")
     model = i3d.InceptionI3d(num_classes=num_classes, final_endpoint='Logits')
     logits, _ = model(X, is_training=True)
 
